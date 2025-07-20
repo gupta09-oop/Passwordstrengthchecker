@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Password Strength Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Courier Prime', monospace; background-color: #0d0d0d; color: #00ff00; }
+    .container { max-width: 800px; }
+    .password-strength { height: 8px; border-radius: 4px; transition: all 0.3s ease; }
+    .strength-0 { width: 5%; background-color: #ff3b30; }
+    .strength-1 { width: 25%; background-color: #ff9500; }
+    .strength-2 { width: 50%; background-color: #ffcc00; }
+    .strength-3 { width: 75%; background-color: #34c759; }
+    .strength-4 { width: 100%; background-color: #28cd41; }
+    #password-input { letter-spacing: 1px; background-color: #1a1a1a; color: #00ff00; }
+    #password-input::placeholder { color: #b0ffb0; }
+    .bg-card { background-color: #1a1a1a; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
+    .icon { width: 20px; height: 20px; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container mx-auto px-4 py-12">
+    <div class="bg-card p-6">
+      <h1 class="text-3xl font-bold mb-4 flex items-center">
+        <img src="https://img.icons8.com/ios-filled/50/00ff00/hacker.png" class="icon" alt="Hacker Icon"/>
+        Cybersecurity Password Strength Analyzer
+      </h1>
+      <p class="text-gray-400 mb-6">Created by KSHITIJ GUPTA</p>
+
+      <div class="relative mb-4">
+        <input id="password-input" aria-label="Enter your password" type="password" class="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Type your password..." autocomplete="off">
+        <button id="toggle-visibility" aria-label="Toggle password visibility" class="absolute right-3 top-3 text-gray-400 hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="strength-meter" class="password-strength strength-0 my-3"></div>
+      <div class="flex justify-between text-xs text-gray-500 mb-6">
+        <span>Very Weak</span><span>Weak</span><span>Moderate</span><span>Strong</span><span>Very Strong</span>
+      </div>
+
+      <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4">
+        <h3 class="font-semibold text-green-400 mb-2">Password Strength Analysis</h3>
+        <div id="strength-feedback" class="text-sm text-gray-300">
+          Password not entered yet. Try typing a password above.
+        </div>
+      </div>
+
+      <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4">
+        <h3 class="font-semibold text-green-400 mb-2">Have I Been Pwned?</h3>
+        <div id="hibp-result" class="text-sm text-gray-300">-</div>
+      </div>
+
+      <div class="mt-6 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+        <h3 class="font-semibold text-green-400 mb-2">Estimated Cracking Time</h3>
+        <div id="cracking-time" class="text-lg font-bold text-gray-300">-</div>
+        <p class="text-sm text-gray-500 mt-1">Based on brute force attacks using modern hardware</p>
+      </div>
+
+      <div class="mt-8 border-t pt-6">
+        <h3 class="font-semibold text-green-400 mb-3">Educational Resources</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a href="https://haveibeenpwned.com/Passwords" target="_blank" class="flex items-start p-3 bg-gray-800 border border-gray-700 rounded-lg hover:shadow-sm transition-shadow">
+            <img src="https://img.icons8.com/ios-filled/50/00ff00/hacker.png" class="icon" alt="Have I Been Pwned Icon"/>
+            <div>
+              <h4 class="font-medium text-green-400">Have I Been Pwned</h4>
+              <p class="text-xs text-gray-300 mt-1">Check if your password has been exposed in data breaches</p>
+            </div>
+          </a>
+          <a href="https://xkcd.com/936/" target="_blank" class="flex items-start p-3 bg-gray-800 border border-gray-700 rounded-lg hover:shadow-sm transition-shadow">
+            <img src="https://img.icons8.com/ios-filled/50/00ff00/hacker.png" class="icon" alt="XKCD Icon"/>
+            <div>
+              <h4 class="font-medium text-green-400">XKCD Password Strength</h4>
+              <p class="text-xs text-gray-300 mt-1">Famous comic explaining password entropy</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const passwordInput = document.getElementById('password-input');
+  const strengthMeter = document.getElementById('strength-meter');
+  const strengthFeedback = document.getElementById('strength-feedback');
+  const crackingTime = document.getElementById('cracking-time');
+  const hibpResult = document.getElementById('hibp-result');
+  const toggleVisibility = document.getElementById('toggle-visibility');
+  let isVisible = false;
+
+  toggleVisibility.addEventListener('click', () => {
+    isVisible = !isVisible;
+    passwordInput.type = isVisible ? 'text' : 'password';
+  });
+
+  passwordInput.addEventListener('input', async () => {
+    const password = passwordInput.value;
+    const result = checkPasswordStrength(password);
+    updateStrengthMeter(result);
+    updateFeedback(result, password);
+    updateCrackingTime(result);
+    if (password.length > 0) await checkHIBP(password);
+    else hibpResult.textContent = '-';
+  });
+
+  function checkPasswordStrength(password) {
+    const length = password.length;
+    const hasLower = /[a-z]/.test(password);
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+    const hasCommon = /(1234|password|qwerty|letmein|welcome|admin)/i.test(password);
+
+    let score = 0;
+    if (length >= 12) score++;
+    if (hasLower && hasUpper) score++;
+    if (hasNumber) score++;
+    if (hasSpecial) score++;
+    if (!hasCommon && length >= 14) score++;
+
+    return { score: Math.min(score, 4), length, hasLower, hasUpper, hasNumber, hasSpecial, hasCommon };
+  }
+
+  function updateStrengthMeter(result) {
+    strengthMeter.className = 'password-strength';
+    strengthMeter.classList.add(`strength-${result.score}`);
+  }
+
+  function updateFeedback(result, password) {
+    if (password.length === 0) {
+      strengthFeedback.textContent = 'Password not entered yet. Try typing a password above.';
+      return;
+    }
+    const descriptions = ['Very Weak', 'Weak', 'Moderate', 'Strong', 'Very Strong'];
+    let feedback = `<strong>${descriptions[result.score]}</strong><br><ul class="list-disc pl-5 mt-2">`;
+    if (result.length < 12) feedback += `<li>Increase length to at least 12 characters (currently ${result.length})</li>`;
+    if (!(result.hasLower && result.hasUpper)) feedback += '<li>Use both upper and lowercase letters</li>';
+    if (!result.hasNumber) feedback += '<li>Add numbers</li>';
+    if (!result.hasSpecial) feedback += '<li>Include special characters</li>';
+    if (result.hasCommon) feedback += '<li>Avoid common passwords or sequences</li>';
+    feedback += '</ul>';
+    strengthFeedback.innerHTML = feedback;
+  }
+
+  function updateCrackingTime(result) {
+    const charsetSize =
+      (result.hasLower ? 26 : 0) +
+      (result.hasUpper ? 26 : 0) +
+      (result.hasNumber ? 10 : 0) +
+      (result.hasSpecial ? 32 : 0);
+    const guesses = Math.pow(charsetSize, result.length);
+    const guessesPerSecond = 1e9;
+    const seconds = guesses / guessesPerSecond;
+    crackingTime.textContent = formatTime(seconds);
+  }
+
+  function formatTime(seconds) {
+    if (seconds < 1) return "<1 second";
+    const units = [["year", 31536000], ["day", 86400], ["hour", 3600], ["minute", 60], ["second", 1]];
+    for (let [name, secs] of units) {
+      if (seconds >= secs) {
+        const value = Math.floor(seconds / secs);
+        return `${value} ${name}${value > 1 ? 's' : ''}`;
+      }
+    }
+  }
+
+  async function checkHIBP(password) {
+    hibpResult.textContent = 'Checking...';
+    const hashBuffer = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(password));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const sha1 = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const prefix = sha1.substring(0, 5);
+    const suffix = sha1.substring(5);
+
+    try {
+      const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+      const text = await response.text();
+      const lines = text.split('\n');
+      const match = lines.find(line => line.startsWith(suffix));
+      if (match) {
+        const count = match.split(':')[1];
+        hibpResult.textContent = `⚠️ This password has appeared in breaches ${count} times. Do NOT use it!`;
+        hibpResult.classList.add('text-red-400');
+      } else {
+        hibpResult.textContent = `✅ This password has not been found in known breaches.`;
+        hibpResult.classList.remove('text-red-400');
+      }
+    } catch (err) {
+      hibpResult.textContent = 'Error checking breach status.';
+    }
+  }
+});
+</script>
+</body>
+</html>
